@@ -50,7 +50,7 @@ def main():
         print(f"💾 Model saved to: {save_path}")
         
     except Exception as e:
-        print(f"❌ Training failed: {e}")
+        print(f" Training failed: {e}")
         raise
 
 if __name__ == "__main__":
