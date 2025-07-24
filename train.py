@@ -1,4 +1,5 @@
 import os
+from transformers import AutoTokenizer  # Added missing import
 from data_utils import load_and_filter_goemotions, oversample_training_data, prepare_tokenized_datasets
 from model_utils import create_tf_datasets, setup_model_and_optimizer, compile_and_train, save_model_and_tokenizer, evaluate_model
 
