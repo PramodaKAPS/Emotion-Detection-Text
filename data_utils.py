@@ -3,7 +3,6 @@ from datasets import load_dataset, Dataset
 from imblearn.over_sampling import RandomOverSampler
 import numpy as np
 
-# Section 1: Dataset Loading and Filtering
 def load_and_filter_goemotions(cache_dir, selected_emotions, num_train=0):
     """
     Load and filter the GoEmotions dataset for selected emotions.
@@ -44,7 +43,6 @@ def load_and_filter_goemotions(cache_dir, selected_emotions, num_train=0):
     valid_df = valid_df[["text", "label"]]
     test_df = test_df[["text", "label"]]
 
-    # Handle full dataset (skip head if num_train <= 0)
     if num_train > 0:
         train_df = train_df.head(num_train)
 
@@ -57,7 +55,6 @@ def load_and_filter_goemotions(cache_dir, selected_emotions, num_train=0):
     
     return train_df, valid_df, test_df, selected_indices
 
-# Section 2: Oversampling for Class Balance
 def oversample_training_data(train_df):
     """
     Oversample the training data to balance emotion classes using RandomOverSampler.
@@ -71,13 +68,12 @@ def oversample_training_data(train_df):
     print(df_resampled["label"].value_counts())
     return df_resampled
 
-# Section 3: Tokenization for Transformer Models
 def prepare_tokenized_datasets(tokenizer, train_df, valid_df, test_df):
     """
     Tokenize datasets for DistilBERT or similar models.
     """
     def tokenize(batch):
-        return tokenizer(batch["text"], truncation=True, padding=True)
+        return tokenizer(batch["text"], truncation=True, padding=True, max_length=128)  # Added max_length for efficiency
 
     train_dataset = Dataset.from_pandas(train_df)
     valid_dataset = Dataset.from_pandas(valid_df)
