@@ -1,5 +1,5 @@
 """
-Setup script for Google Colab environment
+
 """
 import subprocess
 import sys
@@ -19,8 +19,8 @@ def install_requirements():
     for package in packages:
         subprocess.check_call([sys.executable, "-m", "pip", "install", package, "--quiet"])
     
-    print("✅ All required packages installed successfully!")
-    print("📝 Please restart your runtime: Runtime > Restart runtime")
+    print(" All required packages installed successfully!")
+    print(" Please restart your runtime: Runtime > Restart runtime")
 
 def setup_cache_directory():
     """Setup cache directory for Hugging Face models"""
@@ -43,9 +43,9 @@ def setup_cache_directory():
     try:
         from google.colab import drive
         drive.mount('/content/drive')
-        print("✅ Google Drive mounted successfully!")
+        print(" Google Drive mounted successfully!")
     except ImportError:
-        print("⚠️ Not in Google Colab environment - skipping drive mount")'''
+        print(" Not in Google Colab environment - skipping drive mount")'''
 
 if __name__ == "__main__":
     install_requirements()
