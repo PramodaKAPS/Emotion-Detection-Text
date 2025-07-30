@@ -1,3 +1,4 @@
+# inference.py
 """
 Inference utilities for emotion detection
 """
@@ -32,7 +33,7 @@ class EmotionDetector:
         Returns:
             str: Predicted emotion name
         """
-        inputs = self.tokenizer(text, return_tensors="tf", truncation=True, padding=True)
+        inputs = self.tokenizer(text, return_tensors="tf", truncation=True, padding=True, max_length=512)  # Added max_length for better context handling
         logits = self.model(inputs).logits
         prediction = np.argmax(logits, axis=1)[0]
         return self.emotions[prediction]
@@ -47,7 +48,8 @@ class EmotionDetector:
         Returns:
             dict: Dictionary with predicted emotion and confidence scores
         """
-        inputs = self.tokenizer(text, return_tensors="tf", truncation=True, padding=True)
+        inputs = self.tokenizer(text, return_tensors="tf", truncation=True, padding=True, max_length=512)  # Added max_length for better context handling
+        
         logits = self.model(inputs).logits
         
         # Apply softmax to get probabilities
@@ -112,7 +114,7 @@ if __name__ == "__main__":
     model_path = "/content/drive/MyDrive/emotion_model"
     emotions_list = [
         "anger", "sadness", "joy", "disgust", "fear", 
-        "surprise", "gratitude", "remorse", "curiosity", "neutral"
+        "surprise", "neutral"
     ]
     
     interactive_emotion_detection(model_path, emotions_list)
