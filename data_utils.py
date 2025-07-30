@@ -1,3 +1,4 @@
+# data_utils.py
 import pandas as pd
 from datasets import load_dataset, Dataset
 from imblearn.over_sampling import RandomOverSampler
@@ -73,7 +74,7 @@ def prepare_tokenized_datasets(tokenizer, train_df, valid_df, test_df):
     Tokenize datasets for DistilBERT or similar models.
     """
     def tokenize(batch):
-        return tokenizer(batch["text"], truncation=True, padding=True, max_length=128)  # Added max_length for efficiency
+        return tokenizer(batch["text"], truncation=True, padding=True, max_length=512)  # Increased max_length for better context handling
 
     train_dataset = Dataset.from_pandas(train_df)
     valid_dataset = Dataset.from_pandas(valid_df)
