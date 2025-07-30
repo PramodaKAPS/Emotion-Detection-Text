@@ -1,3 +1,4 @@
+# main.py
 """
 
 """
@@ -18,7 +19,7 @@ def main():
     os.makedirs(save_path, exist_ok=True) 
     selected_emotions = [
         "anger", "sadness", "joy", "disgust", "fear", 
-        "surprise", "gratitude", "remorse", "curiosity", "neutral"
+        "surprise", "neutral"
     ]
 
     
