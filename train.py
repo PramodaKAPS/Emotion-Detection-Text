@@ -1,3 +1,5 @@
+# train.py
+
 import os
 from transformers import AutoTokenizer  # Added missing import
 from data_utils import load_and_filter_goemotions, oversample_training_data, prepare_tokenized_datasets
@@ -6,7 +8,7 @@ from model_utils import create_tf_datasets, setup_model_and_optimizer, compile_a
 def main():
     cache_dir = "/root/huggingface_cache"
     save_path = "/root/emotion_model"
-    emotions = ["anger", "sadness", "joy", "disgust", "fear", "surprise", "gratitude", "remorse", "curiosity", "neutral"]
+    emotions = ["anger", "sadness", "joy", "disgust", "fear", "surprise", "neutral"]
     
     # Training parameters for improved accuracy
     config = {
