@@ -1,67 +1,75 @@
-# inference.py
+# inference.py (updated for DistilBERT)
 """
-Inference utilities for emotion detection
+Inference utilities for emotion detection with advanced handling
 """
 import numpy as np
-from transformers import AutoTokenizer, TFDistilBertForSequenceClassification
+from transformers import AutoTokenizer, TFDistilBertForSequenceClassification  # Updated to DistilBERT
+import emoji
+import gensim.downloader as api
+import nltk
+nltk.download('punkt', quiet=True)
+
+# Load pre-trained embeddings
+word_vectors = api.load("glove-wiki-gigaword-300")
 
 class EmotionDetector:
     """
-    Emotion detection inference class
+    Emotion detection inference class with advanced features
     """
     
     def __init__(self, model_path, emotions_list):
-        """
-        Initialize emotion detector
-        
-        Args:
-            model_path (str): Path to saved model
-            emotions_list (list): List of emotion names in order
-        """
         self.emotions = emotions_list
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-        self.model = TFDistilBertForSequenceClassification.from_pretrained(model_path)
+        self.model = TFDistilBertForSequenceClassification.from_pretrained(model_path)  # Updated to DistilBERT
         print(f"✅ Emotion detector loaded from {model_path}")
     
+    def preprocess_with_advanced_handling(self, text):
+        """Advanced preprocessing for emojis, short sentences, complex contexts, and punctuation."""
+        # Emoji handling
+        text = emoji.demojize(text, delimiters=("", ""))
+        mappings = {
+            "smiling_face": "happy",
+            "angry_face": "angry",
+            "crying_face": "sad",
+            "fearful_face": "scared",
+            "surprised_face": "surprised"
+        }
+        for emoji_desc, word in mappings.items():
+            text = text.replace(emoji_desc, word)
+        
+        # Punctuation handling
+        if '?' in text:
+            text = text.replace('?', ' [QUESTION]')
+        else:
+            text += ' [STATEMENT]'
+        
+        # Short sentence handling
+        tokens = nltk.word_tokenize(text)
+        if len(tokens) < 50:
+            text = "Short context: " + text
+        
+        return text
+    
     def predict_emotion(self, text):
-        """
-        Predict emotion for input text
-        
-        Args:
-            text (str): Input text to analyze
-        
-        Returns:
-            str: Predicted emotion name
-        """
-        inputs = self.tokenizer(text, return_tensors="tf", truncation=True, padding=True, max_length=512)  # Added max_length for better context handling
+        text = self.preprocess_with_advanced_handling(text)
+        inputs = self.tokenizer(text, return_tensors="tf", truncation=True, padding=True, max_length=512)  # Adjusted for DistilBERT
         logits = self.model(inputs).logits
         prediction = np.argmax(logits, axis=1)[0]
         return self.emotions[prediction]
     
     def predict_emotion_with_confidence(self, text):
-        """
-        Predict emotion with confidence scores
-        
-        Args:
-            text (str): Input text to analyze
-        
-        Returns:
-            dict: Dictionary with predicted emotion and confidence scores
-        """
-        inputs = self.tokenizer(text, return_tensors="tf", truncation=True, padding=True, max_length=512)  # Added max_length for better context handling
+        text = self.preprocess_with_advanced_handling(text)
+        inputs = self.tokenizer(text, return_tensors="tf", truncation=True, padding=True, max_length=512)  # Adjusted for DistilBERT
         
         logits = self.model(inputs).logits
         
-        # Apply softmax to get probabilities
         import tensorflow as tf
         probabilities = tf.nn.softmax(logits, axis=1).numpy()[0]
         
-        # Create emotion-confidence mapping
         emotion_scores = {
             emotion: float(prob) for emotion, prob in zip(self.emotions, probabilities)
         }
         
-        # Get predicted emotion
         predicted_emotion = self.emotions[np.argmax(probabilities)]
         
         return {
@@ -71,16 +79,9 @@ class EmotionDetector:
         }
 
 def interactive_emotion_detection(model_path, emotions_list):
-    """
-    Interactive emotion detection session
-    
-    Args:
-        model_path (str): Path to saved model
-        emotions_list (list): List of emotion names
-    """
     detector = EmotionDetector(model_path, emotions_list)
     
-    print("\n🎭 Interactive Emotion Detection")
+    print("\n🎭 Interactive Emotion Detection with Advanced Handling")
     print("Enter text to analyze emotions (press Enter to exit)")
     print("-" * 50)
     
@@ -95,7 +96,6 @@ def interactive_emotion_detection(model_path, emotions_list):
             print(f"🎯 Predicted emotion: {result['predicted_emotion']}")
             print(f"📊 Confidence: {result['confidence']:.3f}")
             
-            # Show top 3 emotions
             sorted_emotions = sorted(
                 result['all_scores'].items(), 
                 key=lambda x: x[1], 
@@ -110,7 +110,6 @@ def interactive_emotion_detection(model_path, emotions_list):
             print(f"❌ Error: {e}")
 
 if __name__ == "__main__":
-    # Example usage
     model_path = "/content/drive/MyDrive/emotion_model"
     emotions_list = [
         "anger", "sadness", "joy", "disgust", "fear", 
