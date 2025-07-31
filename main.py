@@ -1,4 +1,4 @@
-# main.py
+# main.py (unchanged)
 """
 
 """
@@ -8,7 +8,7 @@ from train import train_emotion_model
 
 def main():
    
-    print("🚀 Starting Emotion Detection Training")
+    print("🚀 Starting Emotion Detection Training with Advanced Features")
     print("=" * 60)
     
     # Setup cache directory
@@ -24,9 +24,9 @@ def main():
 
     
     config = {
-        "num_train": 5000,
-        "num_epochs": 4,
-        "batch_size": 16
+        "num_train": 500,  # Small for fast training
+        "num_epochs": 2,
+        "batch_size": 8
     }
     
     print(f" Training Configuration:")
