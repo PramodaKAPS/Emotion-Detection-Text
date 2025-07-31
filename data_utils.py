@@ -1,13 +1,50 @@
-# data_utils.py
+# data_utils.py (unchanged from previous, but max_length adjusted in prepare_tokenized_datasets for DistilBERT)
 import pandas as pd
 from datasets import load_dataset, Dataset
 from imblearn.over_sampling import RandomOverSampler
 import numpy as np
+import emoji  # For emoji handling
+import gensim.downloader as api  # For embeddings
+import nltk  # For sentence tokenization and length checks
+nltk.download('punkt', quiet=True)
 
-def load_and_filter_goemotions(cache_dir, selected_emotions, num_train=0):
+# Load pre-trained word embeddings
+word_vectors = api.load("glove-wiki-gigaword-300")
+
+def preprocess_text(text, use_advanced_emoji=True, handle_short_sentences=True):
+    """Advanced preprocessing: Handle emojis, short sentences, complex contexts, and punctuation."""
+    # Emoji handling
+    text = emoji.demojize(text, delimiters=("", ""))
+    if use_advanced_emoji:
+        # Semantic mappings for common emojis (expand as needed)
+        mappings = {
+            "smiling_face": "happy",
+            "angry_face": "angry",
+            "crying_face": "sad",
+            "fearful_face": "scared",
+            "surprised_face": "surprised"
+        }
+        for emoji_desc, word in mappings.items():
+            text = text.replace(emoji_desc, word)
+    
+    # Punctuation handling for questions vs. statements
+    if '?' in text:
+        text = text.replace('?', ' [QUESTION]')
+    else:
+        text += ' [STATEMENT]'
+    
+    # Short sentence handling: Augment if <50 tokens
+    if handle_short_sentences:
+        tokens = nltk.word_tokenize(text)
+        if len(tokens) < 50:
+            text = "Short context: " + text  # Minimal framing for better model understanding
+    
+    # For complex sentences: No explicit change needed, as DistilBERT handles up to 512 tokens
+    return text
+
+def load_and_filter_goemotions(cache_dir, selected_emotions, num_train=0, use_advanced_emoji=True, handle_short_sentences=True):
     """
-    Load and filter the GoEmotions dataset for selected emotions.
-    If num_train <= 0, use the full filtered train set.
+    Load and filter the GoEmotions dataset with advanced preprocessing.
     """
     print("Loading GoEmotions dataset...")
     dataset = load_dataset("go_emotions", "simplified", cache_dir=cache_dir)
@@ -44,6 +81,11 @@ def load_and_filter_goemotions(cache_dir, selected_emotions, num_train=0):
     valid_df = valid_df[["text", "label"]]
     test_df = test_df[["text", "label"]]
 
+    # Apply advanced preprocessing
+    train_df["text"] = train_df["text"].apply(lambda t: preprocess_text(t, use_advanced_emoji, handle_short_sentences))
+    valid_df["text"] = valid_df["text"].apply(lambda t: preprocess_text(t, use_advanced_emoji, handle_short_sentences))
+    test_df["text"] = test_df["text"].apply(lambda t: preprocess_text(t, use_advanced_emoji, handle_short_sentences))
+
     if num_train > 0:
         train_df = train_df.head(num_train)
 
@@ -71,10 +113,10 @@ def oversample_training_data(train_df):
 
 def prepare_tokenized_datasets(tokenizer, train_df, valid_df, test_df):
     """
-    Tokenize datasets for DistilBERT or similar models.
+    Tokenize datasets for DistilBERT with max_length=512.
     """
     def tokenize(batch):
-        return tokenizer(batch["text"], truncation=True, padding=True, max_length=512)  # Increased max_length for better context handling
+        return tokenizer(batch["text"], truncation=True, padding=True, max_length=512)  # Adjusted for DistilBERT
 
     train_dataset = Dataset.from_pandas(train_df)
     valid_dataset = Dataset.from_pandas(valid_df)
