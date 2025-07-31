@@ -1,6 +1,8 @@
 # train.py (updated to use full dataset and 4 epochs with DistilBERT)
 
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # or '3' for ERROR only
+
 from transformers import AutoTokenizer
 from data_utils import load_and_filter_goemotions, oversample_training_data, prepare_tokenized_datasets
 from model_utils import create_tf_datasets, setup_model_and_optimizer, compile_and_train, save_model_and_tokenizer, evaluate_model
