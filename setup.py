@@ -1,5 +1,4 @@
-# setup.py
-
+# setup.py (unchanged)
 """
 
 """
@@ -15,7 +14,11 @@ def install_requirements():
         "transformers==4.53.2",
         "imbalanced-learn",
         "pandas",
-        "numpy"
+        "numpy",
+        "emoji==2.2.0",
+        "gensim==4.3.2",
+        "nltk==3.8.1",
+        "scipy==1.11.4"
     ]
     
     for package in packages:
