@@ -1,4 +1,5 @@
-# train.py (updated for DistilBERT)
+# train.py (updated to use full dataset and 4 epochs with DistilBERT)
+
 import os
 from transformers import AutoTokenizer
 from data_utils import load_and_filter_goemotions, oversample_training_data, prepare_tokenized_datasets
@@ -10,8 +11,8 @@ def main():
     emotions = ["anger", "sadness", "joy", "disgust", "fear", "surprise", "neutral"]
     
     config = {
-        "num_train": 500,  # Small for fast training
-        "num_epochs": 2,
+        "num_train": 0,  # Full dataset as requested
+        "num_epochs": 4,  # Updated to 4 epochs as requested
         "batch_size": 8,
         "learning_rate": 5e-6
     }
@@ -22,7 +23,7 @@ def main():
     print(f"   - Cache directory: {cache_dir}")
     print(f"   - Save path: {save_path}")
     print(f"   - Selected emotions: {emotions}")
-    print(f"   - Training samples: {config['num_train']} (before oversampling)")
+    print(f"   - Training samples: Full dataset")
     print(f"   - Epochs: {config['num_epochs']}")
     print(f"   - Batch size: {config['batch_size']}")
     print(f"   - Learning rate: {config['learning_rate']}")
@@ -34,12 +35,12 @@ def main():
         )
         oversampled_train_df = oversample_training_data(train_df)
         
-        tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased", cache_dir=cache_dir)  # Updated to DistilBERT
+        tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased", cache_dir=cache_dir)
         tokenized_train, tokenized_valid, tokenized_test = prepare_tokenized_datasets(tokenizer, oversampled_train_df, valid_df, test_df)
         
         tf_train, tf_val, tf_test = create_tf_datasets(tokenized_train, tokenized_valid, tokenized_test, tokenizer, sel_indices, config["batch_size"])
         
-        model, optimizer = setup_model_and_optimizer("distilbert-base-uncased", len(emotions), tf_train, config["num_epochs"], config["learning_rate"], cache_dir)  # Updated to DistilBERT
+        model, optimizer = setup_model_and_optimizer("distilbert-base-uncased", len(emotions), tf_train, config["num_epochs"], config["learning_rate"], cache_dir)
         
         model = compile_and_train(model, optimizer, tf_train, tf_val, config["num_epochs"])
         
